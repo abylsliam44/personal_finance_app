@@ -1,0 +1,2 @@
+ALTER TABLE transactions
+ADD COLUMN IF NOT EXISTS currency VARCHAR(50) NOT NULL DEFAULT 'default';

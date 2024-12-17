@@ -1,0 +1,977 @@
+definitions:
+  models.Account:
+    properties:
+      balance:
+        type: number
+      created_at:
+        type: string
+      currency:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      type:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  models.Category:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      type:
+        description: '"income" or "expense"'
+        type: string
+      user_id:
+        type: integer
+    type: object
+  models.FinancialGoal:
+    properties:
+      created_at:
+        type: string
+      current_amount:
+        type: number
+      deadline:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      priority:
+        type: integer
+      target_amount:
+        type: number
+      user_id:
+        type: integer
+    type: object
+  models.GoalProgress:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      progress:
+        type: number
+      saved_amount:
+        type: number
+      target_amount:
+        type: number
+    type: object
+  models.Transaction:
+    properties:
+      account_id:
+        type: integer
+      amount:
+        type: number
+      category:
+        type: integer
+      created_at:
+        type: string
+      currency:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      type:
+        description: '"income" or "expense"'
+        type: string
+      user_id:
+        type: integer
+    type: object
+  models.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      password_hash:
+        type: string
+      preferred_currency:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /accounts:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает все счета пользователя
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Account'
+            type: array
+        "400":
+          description: Invalid user ID
+          schema:
+            type: string
+        "500":
+          description: Failed to retrieve accounts
+          schema:
+            type: string
+      summary: Получение всех счетов
+      tags:
+      - Accounts
+  /accounts/{id}/transactions:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список транзакций, связанных с указанным счётом
+      parameters:
+      - description: Account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Transaction'
+            type: array
+        "400":
+          description: Invalid account ID
+          schema:
+            type: string
+        "404":
+          description: Account not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Получить транзакции по счёту
+      tags:
+      - Transactions
+  /accounts/create:
+    post:
+      consumes:
+      - application/json
+      description: Добавляет новый счёт
+      parameters:
+      - description: Account body
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/models.Account'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            type: string
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "500":
+          description: Failed to create account
+          schema:
+            type: string
+      summary: Создание счёта
+      tags:
+      - Accounts
+  /accounts/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет существующий счёт по его ID
+      parameters:
+      - description: Account ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Deleted
+          schema:
+            type: string
+        "400":
+          description: Invalid account ID
+          schema:
+            type: string
+        "500":
+          description: Failed to delete account
+          schema:
+            type: string
+      summary: Удаление счёта
+      tags:
+      - Accounts
+  /accounts/get:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает информацию о счёте по его ID
+      parameters:
+      - description: Account ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Account'
+        "400":
+          description: Invalid account ID
+          schema:
+            type: string
+        "404":
+          description: Account not found
+          schema:
+            type: string
+      summary: Информация о счёте
+      tags:
+      - Accounts
+  /accounts/update:
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные существующего счёта
+      parameters:
+      - description: Account body
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/models.Account'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated
+          schema:
+            type: string
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "500":
+          description: Failed to update account
+          schema:
+            type: string
+      summary: Обновление счёта
+      tags:
+      - Accounts
+  /categories:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список всех категорий
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Category'
+            type: array
+        "500":
+          description: Failed to retrieve categories
+          schema:
+            type: string
+      summary: Список категорий
+      tags:
+      - Categories
+  /categories/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет категорию по её ID
+      parameters:
+      - description: Category ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Deleted
+          schema:
+            type: string
+        "400":
+          description: Invalid category ID
+          schema:
+            type: string
+        "500":
+          description: Failed to delete category
+          schema:
+            type: string
+      summary: Удаление категории
+      tags:
+      - Categories
+    get:
+      consumes:
+      - application/json
+      description: Возвращает данные категории по её ID
+      parameters:
+      - description: Category ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Category'
+        "400":
+          description: Invalid category ID
+          schema:
+            type: string
+        "404":
+          description: Category not found
+          schema:
+            type: string
+        "500":
+          description: Failed to retrieve category
+          schema:
+            type: string
+      summary: Получение категории по ID
+      tags:
+      - Categories
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные категории
+      parameters:
+      - description: Category body
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/models.Category'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated
+          schema:
+            type: string
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "500":
+          description: Failed to update category
+          schema:
+            type: string
+      summary: Обновление категории
+      tags:
+      - Categories
+  /categories/{id}/transactions:
+    get:
+      description: Возвращает список всех транзакций, связанных с заданной категорией
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Transaction'
+            type: array
+        "400":
+          description: Invalid category ID
+          schema:
+            type: string
+        "404":
+          description: Category not found
+          schema:
+            type: string
+        "500":
+          description: Failed to retrieve transactions
+          schema:
+            type: string
+      summary: Получить транзакции по категории
+      tags:
+      - Transactions
+  /categories/create:
+    post:
+      consumes:
+      - application/json
+      description: Создает новую категорию
+      parameters:
+      - description: Category body
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/models.Category'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            type: string
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "500":
+          description: Failed to create category
+          schema:
+            type: string
+      summary: Создание категории
+      tags:
+      - Categories
+  /financial-goals:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список всех финансовых целей для указанного пользователя
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список финансовых целей
+          schema:
+            items:
+              $ref: '#/definitions/models.FinancialGoal'
+            type: array
+        "400":
+          description: Invalid user_id
+          schema:
+            type: string
+        "500":
+          description: Failed to retrieve financial goals
+          schema:
+            type: string
+      summary: Список финансовых целей
+      tags:
+      - Financial Goals
+  /financial-goals/create:
+    post:
+      consumes:
+      - application/json
+      description: Создает новую финансовую цель
+      parameters:
+      - description: Financial Goal body
+        in: body
+        name: goal
+        required: true
+        schema:
+          $ref: '#/definitions/models.FinancialGoal'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            type: string
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "500":
+          description: Failed to create financial goal
+          schema:
+            type: string
+      summary: Создание финансовой цели
+      tags:
+      - Financial Goals
+  /financial-goals/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет существующую финансовую цель по её ID
+      parameters:
+      - description: Financial Goal ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Deleted
+          schema:
+            type: string
+        "400":
+          description: Invalid financial goal ID
+          schema:
+            type: string
+        "500":
+          description: Failed to delete financial goal
+          schema:
+            type: string
+      summary: Удаление финансовой цели
+      tags:
+      - Financial Goals
+  /financial-goals/update:
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные существующей финансовой цели
+      parameters:
+      - description: Financial Goal body
+        in: body
+        name: goal
+        required: true
+        schema:
+          $ref: '#/definitions/models.FinancialGoal'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated
+          schema:
+            type: string
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "500":
+          description: Failed to update financial goal
+          schema:
+            type: string
+      summary: Обновление финансовой цели
+      tags:
+      - Financial Goals
+  /reports/by-category:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает расходы, сгруппированные по категориям за указанный
+        период
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      - description: Start Date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: End Date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties:
+                type: number
+              type: object
+            type: array
+        "400":
+          description: Invalid parameters
+          schema:
+            type: string
+        "500":
+          description: Failed to retrieve expenses
+          schema:
+            type: string
+      summary: Расходы по категориям
+      tags:
+      - Reports
+  /reports/summary:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает общий отчет или создает новый и сохраняет его в таблицу
+        reports
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid user ID
+          schema:
+            type: string
+        "500":
+          description: Failed to retrieve or generate summary report
+          schema:
+            type: string
+      summary: Сводный отчет
+      tags:
+      - Reports
+  /transactions:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает все транзакции текущего пользователя
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Transaction'
+            type: array
+        "400":
+          description: Invalid user ID
+          schema:
+            type: string
+        "500":
+          description: Failed to retrieve transactions
+          schema:
+            type: string
+      summary: Список транзакций
+      tags:
+      - Transactions
+  /transactions/create:
+    post:
+      consumes:
+      - application/json
+      description: Добавляет новую транзакцию
+      parameters:
+      - description: Transaction body
+        in: body
+        name: transaction
+        required: true
+        schema:
+          $ref: '#/definitions/models.Transaction'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            type: string
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "500":
+          description: Failed to create transaction
+          schema:
+            type: string
+      summary: Создать транзакцию
+      tags:
+      - Transactions
+  /transactions/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет транзакцию по ID
+      parameters:
+      - description: Transaction ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Deleted
+          schema:
+            type: string
+        "400":
+          description: Invalid transaction ID
+          schema:
+            type: string
+        "500":
+          description: Failed to delete transaction
+          schema:
+            type: string
+      summary: Удалить транзакцию
+      tags:
+      - Transactions
+  /transactions/get:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает данные конкретной транзакции
+      parameters:
+      - description: Transaction ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Transaction'
+        "400":
+          description: Invalid transaction ID
+          schema:
+            type: string
+        "404":
+          description: Transaction not found
+          schema:
+            type: string
+        "500":
+          description: Failed to retrieve transaction
+          schema:
+            type: string
+      summary: Получение транзакции по ID
+      tags:
+      - Transactions
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список всех зарегистрированных пользователей
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+      summary: Список пользователей
+      tags:
+      - Users
+  /users/{id}/goals/progress:
+    get:
+      description: Возвращает процент выполнения для каждой финансовой цели пользователя
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.GoalProgress'
+            type: array
+        "400":
+          description: Invalid user ID
+          schema:
+            type: string
+        "500":
+          description: Failed to retrieve goal progress
+          schema:
+            type: string
+      summary: Получить прогресс выполнения финансовых целей
+      tags:
+      - Financial Goals
+  /users/{id}/transactions/compare:
+    get:
+      description: Возвращает общие доходы, расходы и баланс за указанный временной
+        период
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Начало периода (YYYY-MM-DD)
+        in: query
+        name: from
+        required: true
+        type: string
+      - description: Конец периода (YYYY-MM-DD)
+        in: query
+        name: to
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: number
+            type: object
+        "400":
+          description: Invalid parameters
+          schema:
+            type: string
+        "500":
+          description: Failed to calculate income and expenses
+          schema:
+            type: string
+      summary: Сравнение доходов и расходов
+      tags:
+      - Transactions
+  /users/create:
+    post:
+      consumes:
+      - application/json
+      description: Создает нового пользователя
+      parameters:
+      - description: User body
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            type: string
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "500":
+          description: Failed to create user
+          schema:
+            type: string
+      summary: Регистрация пользователя
+      tags:
+      - Users
+  /users/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет пользователя по указанному ID
+      parameters:
+      - description: User ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Deleted
+          schema:
+            type: string
+        "400":
+          description: Invalid user ID
+          schema:
+            type: string
+        "500":
+          description: Failed to delete user
+          schema:
+            type: string
+      summary: Удаление пользователя
+      tags:
+      - Users
+  /users/get:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает данные конкретного пользователя
+      parameters:
+      - description: User ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "404":
+          description: User not found
+          schema:
+            type: string
+      summary: Получение пользователя по ID
+      tags:
+      - Users
+  /users/update:
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные пользователя
+      parameters:
+      - description: User body
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated
+          schema:
+            type: string
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "500":
+          description: Failed to update user
+          schema:
+            type: string
+      summary: Обновление пользователя
+      tags:
+      - Users
+swagger: "2.0"

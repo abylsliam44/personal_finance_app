@@ -1,0 +1,13 @@
+database:
+  host: "localhost"
+  port: 5432
+  user: "finance_user"
+  password: "secure_password"
+  dbname: "finance_db"
+  sslmode: "disable"
+
+redis:
+  addr: "localhost:6379"
+  password: ""
+  db: 0
+
