@@ -4,7 +4,6 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-// NewRedisClient создает и возвращает Redis клиент
 func NewRedisClient(addr, password string, db int) *redis.Client {
 	return redis.NewClient(&redis.Options{
 		Addr:     addr,

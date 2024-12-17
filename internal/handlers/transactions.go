@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -68,8 +70,22 @@ func (h *TransactionHandler) GetAllTransactionsWithCacheHandler(w http.ResponseW
 		return
 	}
 
+	// Определяем источник данных
+	source := "database"
+	ctx := context.Background()
+	cacheKey := fmt.Sprintf("transactions:user:%d", userID)
+	if _, err := h.Service.RedisClient.Get(ctx, cacheKey).Result(); err == nil {
+		source = "cache (Redis)"
+	}
+
+	// Формируем ответ
+	response := map[string]interface{}{
+		"source":       source,
+		"transactions": transactions,
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(transactions)
+	json.NewEncoder(w).Encode(response)
 }
 
 // CreateTransactionHandler godoc

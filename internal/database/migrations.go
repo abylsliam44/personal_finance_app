@@ -10,12 +10,13 @@ import (
 	"strings"
 )
 
-// RunMigrations выполняет все SQL-миграции из папки migrations.
-func RunMigrations(db *sql.DB, migrationsDir string) error {
+func RunMigrations(db *sql.DB, migrationsDir string) ([]string, error) {
+	var appliedMigrations []string
+
 	// Чтение списка файлов в директории миграций.
 	files, err := ioutil.ReadDir(migrationsDir)
 	if err != nil {
-		return fmt.Errorf("failed to read migrations directory: %w", err)
+		return nil, fmt.Errorf("failed to read migrations directory: %w", err)
 	}
 
 	// Фильтрация только SQL-файлов.
@@ -29,7 +30,7 @@ func RunMigrations(db *sql.DB, migrationsDir string) error {
 	// Проверка, есть ли миграции.
 	if len(migrationFiles) == 0 {
 		log.Println("No migration files found.")
-		return nil
+		return nil, nil
 	}
 
 	// Сортировка файлов по имени.
@@ -37,19 +38,21 @@ func RunMigrations(db *sql.DB, migrationsDir string) error {
 
 	// Проверка, существует ли таблица migrations
 	if err := ensureMigrationsTableExists(db); err != nil {
-		return err
+		return nil, err
 	}
 
 	// Применение каждой миграции.
 	for _, file := range migrationFiles {
 		// Проверка, была ли уже применена эта миграция
 		if err := applyMigrationIfNotApplied(db, file, migrationsDir); err != nil {
-			return err
+			return nil, err
 		}
+		// Добавляем имя миграции в список
+		appliedMigrations = append(appliedMigrations, file)
 	}
 
 	log.Println("All migrations applied successfully.")
-	return nil
+	return appliedMigrations, nil
 }
 
 // ensureMigrationsTableExists проверяет существование таблицы для хранения миграций.

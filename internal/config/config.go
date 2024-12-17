@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 
 	"gopkg.in/yaml.v2"
@@ -12,7 +13,14 @@ type DatabaseConfig struct {
 	User     string `yaml:"user"`
 	Password string `yaml:"password"`
 	DBName   string `yaml:"dbname"`
-	SSLMode  string `yaml:"sslmode"` // Добавлено поле для SSLMode
+	SSLMode  string `yaml:"sslmode"`
+}
+
+func (db DatabaseConfig) DSN() string {
+	return fmt.Sprintf(
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+		db.Host, db.Port, db.User, db.Password, db.DBName, db.SSLMode,
+	)
 }
 
 type RedisConfig struct {
