@@ -118,8 +118,8 @@ redis:
 ### Installation Steps
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/username/finance_project.git
-   cd finance_project/backend
+   git clone https://github.com/abylsliam44/personal_finance_project.git
+   cd personal_finance_project/backend
    ```
 2. **Install Dependencies**
    ```bash
