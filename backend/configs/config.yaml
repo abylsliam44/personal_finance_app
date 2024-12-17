@@ -1,7 +1,0 @@
-database:
-  host: localhost
-  port: 5432
-  user: finance_user
-  password: secure_password
-  name: finance_db
-  sslmode: disable
