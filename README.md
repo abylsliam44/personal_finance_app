@@ -161,4 +161,4 @@ For suggestions, feedback, or issues:
 - **GitHub**: [abylay](https://github.com/abylsliam44/)
 
 ---
-_Developed with ❤️ by Abylay Slamzhanov
+Developed with ❤️ by Abylay Slamzhanov
